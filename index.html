@@ -71,18 +71,6 @@
             transform: scale(1.05);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
         }
-        .search-input {
-            background-color: #4a5568; /* Dark input background */
-            border-color: rgba(255, 255, 255, 0.15);
-            color: #e2e8f0;
-        }
-        .search-input::placeholder {
-            color: #a0aec0; /* Lighter placeholder text */
-        }
-        .search-input:focus {
-            border-color: var(--primary-light);
-            box-shadow: 0 0 0 1px var(--primary-light);
-        }
         .type-tag {
             font-size: 0.75rem;
             font-weight: 600;
@@ -114,7 +102,7 @@
         </header>
 
         <!-- A-Z Navigation Bar -->
-        <div id="az-nav" class="flex flex-wrap justify-center gap-1 mb-6 p-3 az-nav rounded-xl shadow-inner">
+        <div id="az-nav" class="flex flex-wrap justify-center gap-1 mb-8 p-3 az-nav rounded-xl shadow-inner">
             <!-- Buttons dynamically generated here -->
         </div>
 
@@ -128,22 +116,14 @@
             </div>
         </div>
 
-        <!-- Search Input -->
-        <div class="mb-6">
-            <div class="relative">
-                <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-                <input type="text" id="search-input" placeholder="Search across all names..." class="w-full pl-10 pr-4 py-3 search-input rounded-xl focus:border-emerald-500 focus:ring-emerald-500 transition duration-200 outline-none">
-            </div>
-        </div>
-
         <!-- Name List Section -->
         <div id="name-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto pr-3">
             <!-- Name items will be injected here -->
         </div>
 
-        <!-- Message for empty search -->
+        <!-- Message for empty filter -->
         <div id="no-results" class="hidden text-center text-gray-400 p-8 mt-4 bg-gray-700 rounded-lg">
-            No names match your current letter selection or search query.
+            No names match your current letter selection.
         </div>
         
         <!-- Custom Message Box for Copy Success/Failure -->
@@ -346,29 +326,17 @@
         }
 
         /**
-         * Filters the master list based on current A-Z selection and search query.
+         * Filters the master list based ONLY on the current A-Z selection.
          * @returns {Array} The filtered list of name objects.
          */
         function filterNames() {
-            const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
-
-            let filteredList = ALL_NAMES_LIST;
-
-            // 1. Filter by A-Z letter
-            if (currentFilterLetter !== 'All') {
-                filteredList = filteredList.filter(item => 
-                    item.name.startsWith(currentFilterLetter)
-                );
+            if (currentFilterLetter === 'All') {
+                return ALL_NAMES_LIST;
             }
 
-            // 2. Filter by Search Query
-            if (searchQuery.length > 0) {
-                filteredList = filteredList.filter(item => 
-                    item.name.toLowerCase().includes(searchQuery)
-                );
-            }
-
-            return filteredList;
+            return ALL_NAMES_LIST.filter(item => 
+                item.name.startsWith(currentFilterLetter)
+            );
         }
 
         /**
@@ -408,7 +376,8 @@
 
                 // Type Tag
                 const typeTag = document.createElement('span');
-                typeTag.className = `type-tag ${item.type === 'H' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`;
+                const typeClass = item.type === 'H' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700';
+                typeTag.className = `type-tag ${typeClass}`;
                 typeTag.textContent = NAME_TYPE_MAP[item.type];
 
                 // Gender Tag
@@ -476,9 +445,6 @@
                     btn.classList.remove('active');
                 }
             });
-            
-            // Clear search input when switching A-Z letter
-            document.getElementById('search-input').value = '';
 
             // Update the list display
             renderNameList(filterNames());
@@ -496,12 +462,6 @@
 
             // 3. Initial render of the full list
             renderNameList(ALL_NAMES_LIST);
-
-            // 4. Set up search input listener (typing triggers filter)
-            document.getElementById('search-input').addEventListener('input', () => {
-                // When searching, reset A-Z filter to 'All'
-                handleAzClick('All'); 
-            });
         });
     </script>
 </body>
